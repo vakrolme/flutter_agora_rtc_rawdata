@@ -1,6 +1,8 @@
 package io.agora.agora_rtc_rawdata
 
 import androidx.annotation.NonNull
+import android.os.Handler
+import android.os.Looper
 import io.agora.rtc.rawdata.base.AudioFrame
 import io.agora.rtc.rawdata.base.IAudioFrameObserver
 import io.agora.rtc.rawdata.base.IVideoFrameObserver
@@ -19,7 +21,7 @@ class AgoraRtcRawdataPlugin : FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel: MethodChannel
-
+  private var uiThreadHandler = Handler(Looper.getMainLooper());
   private var audioObserver: IAudioFrameObserver? = null
   private var videoObserver: IVideoFrameObserver? = null
 
@@ -64,16 +66,13 @@ class AgoraRtcRawdataPlugin : FlutterPlugin, MethodCallHandler {
         if (videoObserver == null) {
           videoObserver = object : IVideoFrameObserver((call.arguments as Number).toLong()) {
             override fun onCaptureVideoFrame(videoFrame: VideoFrame): Boolean {
-              // Arrays.fill(videoFrame.getuBuffer(), 0)
-              // Arrays.fill(videoFrame.getvBuffer(), 0)
-              channel.invokeMethod("onFrame", System.currentTimeMillis())
+              uiThreadHandler.post {
+                channel.invokeMethod("onFrame", System.currentTimeMillis())
+              }
               return true
             }
 
-             override fun onRenderVideoFrame(uid: Int, videoFrame: VideoFrame): Boolean {
-            //   // unsigned char value 255
-            //   Arrays.fill(videoFrame.getuBuffer(), -1)
-            //   Arrays.fill(videoFrame.getvBuffer(), -1)
+            override fun onRenderVideoFrame(uid: Int, videoFrame: VideoFrame): Boolean {
                return true
              }
           }
