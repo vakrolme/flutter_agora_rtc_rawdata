@@ -64,17 +64,30 @@ class AgoraRtcRawdataPlugin : FlutterPlugin, MethodCallHandler {
         if (videoObserver == null) {
           videoObserver = object : IVideoFrameObserver((call.arguments as Number).toLong()) {
             override fun onCaptureVideoFrame(videoFrame: VideoFrame): Boolean {
-              Arrays.fill(videoFrame.getuBuffer(), 0)
-              Arrays.fill(videoFrame.getvBuffer(), 0)
+              // Arrays.fill(videoFrame.getuBuffer(), 0)
+              // Arrays.fill(videoFrame.getvBuffer(), 0)
+              val name = "onFrame" // or "baz", or "unknown"
+              val value = System.currentTimeMillis()
+              channel.invokeMethod(name, value, object: MethodChannel.Result {
+                override fun success(result: Any?) {
+                  Log.i("MSG", "$result")
+                }
+                override fun error(code: String?, msg: String?, details: Any?) {
+                  Log.e("MSG", "$name failed: $msg")
+                }
+                override fun notImplemented() {
+                  Log.e("MSG", "$name not implemented")
+                }
+              })
               return true
             }
 
-            override fun onRenderVideoFrame(uid: Int, videoFrame: VideoFrame): Boolean {
-              // unsigned char value 255
-              Arrays.fill(videoFrame.getuBuffer(), -1)
-              Arrays.fill(videoFrame.getvBuffer(), -1)
-              return true
-            }
+            // override fun onRenderVideoFrame(uid: Int, videoFrame: VideoFrame): Boolean {
+            //   // unsigned char value 255
+            //   Arrays.fill(videoFrame.getuBuffer(), -1)
+            //   Arrays.fill(videoFrame.getvBuffer(), -1)
+            //   return true
+            // }
           }
         }
         videoObserver?.registerVideoFrameObserver()
