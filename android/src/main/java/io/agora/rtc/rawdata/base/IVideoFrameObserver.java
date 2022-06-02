@@ -31,7 +31,7 @@ public abstract class IVideoFrameObserver {
   public boolean getSmoothRenderingEnabled() { return false; }
 
   public int getObservedFramePosition() {
-    return POSITION_POST_CAPTURER | POSITION_PRE_RENDERER;
+    return POSITION_PRE_ENCODER | POSITION_PRE_RENDERER;
   }
 
   public boolean isMultipleChannelFrameWanted() { return false; }
