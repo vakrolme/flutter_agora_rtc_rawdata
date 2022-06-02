@@ -65,10 +65,14 @@ class AgoraRtcRawdataPlugin : FlutterPlugin, MethodCallHandler {
       "registerVideoFrameObserver" -> {
         if (videoObserver == null) {
           videoObserver = object : IVideoFrameObserver((call.arguments as Number).toLong()) {
-            override fun onCaptureVideoFrame(videoFrame: VideoFrame): Boolean {
+            override fun onPreEncodeVideoFrame(videoFrame: VideoFrame): Boolean {
               uiThreadHandler.post {
                 channel.invokeMethod("onFrame", System.currentTimeMillis())
               }
+              return true
+            }
+            
+            override fun onCaptureVideoFrame(videoFrame: VideoFrame): Boolean {
               return true
             }
 

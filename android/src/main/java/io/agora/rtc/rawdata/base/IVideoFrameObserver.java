@@ -15,9 +15,7 @@ public abstract class IVideoFrameObserver {
 
   public abstract boolean onCaptureVideoFrame(@NonNull VideoFrame videoFrame);
 
-  public boolean onPreEncodeVideoFrame(@NonNull VideoFrame videoFrame) {
-    return true;
-  }
+  public abstract boolean onPreEncodeVideoFrame(@NonNull VideoFrame videoFrame);
 
   public abstract boolean onRenderVideoFrame(int uid,
                                              @NonNull VideoFrame videoFrame);
