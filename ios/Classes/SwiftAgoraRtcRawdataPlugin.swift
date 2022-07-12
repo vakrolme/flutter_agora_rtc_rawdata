@@ -57,7 +57,7 @@ public class SwiftAgoraRtcRawdataPlugin: NSObject, FlutterPlugin, AgoraAudioFram
         }
     }
 
-    public func onPreEncode(_ videoFrame: AgoraVideoFrame) -> Bool {
+    public func onPreEncodeVideoFrame(_ videoFrame: AgoraVideoFrame) -> Bool {
         DispatchQueue.main.async {
             self.channel.invokeMethod("onFrame", arguments: Date().millisecondsSince1970)
             print("onPreEncode hook")
