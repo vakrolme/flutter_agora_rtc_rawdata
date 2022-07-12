@@ -1,7 +1,18 @@
 import Flutter
 import UIKit
+extension Date {
+ var millisecondsSince1970:Int64 {
+        return Int64((self.timeIntervalSince1970 * 1000.0).rounded())
+        //RESOLVED CRASH HERE
+    }
 
+    init(milliseconds:Int) {
+        self = Date(timeIntervalSince1970: TimeInterval(milliseconds / 1000))
+    }
+}
 public class SwiftAgoraRtcRawdataPlugin: NSObject, FlutterPlugin, AgoraAudioFrameDelegate, AgoraVideoFrameDelegate {
+    var channel = FlutterMethodChannel()
+    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "agora_rtc_rawdata", binaryMessenger: registrar.messenger())
         let instance = SwiftAgoraRtcRawdataPlugin()
@@ -46,6 +57,14 @@ public class SwiftAgoraRtcRawdataPlugin: NSObject, FlutterPlugin, AgoraAudioFram
         }
     }
 
+    public func onPreEncode(_ videoFrame: AgoraVideoFrame) -> Bool {
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("onFrame", arguments: Date().millisecondsSince1970)
+            print("onPreEncode hook")
+        }
+        return true
+    }
+
     public func onRecord(_: AgoraAudioFrame) -> Bool {
         return true
     }
@@ -63,14 +82,10 @@ public class SwiftAgoraRtcRawdataPlugin: NSObject, FlutterPlugin, AgoraAudioFram
     }
 
     public func onCapture(_ videoFrame: AgoraVideoFrame) -> Bool {
-        memset(videoFrame.uBuffer, 0, Int(videoFrame.uStride * videoFrame.height) / 2)
-        memset(videoFrame.vBuffer, 0, Int(videoFrame.vStride * videoFrame.height) / 2)
         return true
     }
 
     public func onRenderVideoFrame(_ videoFrame: AgoraVideoFrame, uid _: UInt) -> Bool {
-        memset(videoFrame.uBuffer, 255, Int(videoFrame.uStride * videoFrame.height) / 2)
-        memset(videoFrame.vBuffer, 255, Int(videoFrame.vStride * videoFrame.height) / 2)
         return true
     }
 }

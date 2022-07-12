@@ -436,7 +436,7 @@ class IVideoFrameObserver {
    * @return A bit mask that controls the frame position of the video observer: #VIDEO_OBSERVER_POSITION.
    *
    */
-  virtual uint32_t getObservedFramePosition() { return static_cast<uint32_t>(POSITION_POST_CAPTURER | POSITION_PRE_RENDERER); }
+  virtual uint32_t getObservedFramePosition() { return static_cast<uint32_t>(POSITION_PRE_ENCODER | POSITION_PRE_RENDERER); }
 
   /** Determines whether to receive video data from multiple channels.
 
