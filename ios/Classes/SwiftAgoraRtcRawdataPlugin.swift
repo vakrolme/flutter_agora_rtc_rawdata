@@ -11,11 +11,12 @@ extension Date {
     }
 }
 public class SwiftAgoraRtcRawdataPlugin: NSObject, FlutterPlugin, AgoraAudioFrameDelegate, AgoraVideoFrameDelegate {
-    var channel = FlutterMethodChannel()
-    
+    lazy var schannel = FlutterMethodChannel()
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "agora_rtc_rawdata", binaryMessenger: registrar.messenger())
         let instance = SwiftAgoraRtcRawdataPlugin()
+        instance.schannel = channel
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
@@ -57,13 +58,12 @@ public class SwiftAgoraRtcRawdataPlugin: NSObject, FlutterPlugin, AgoraAudioFram
         }
     }
 
-    public func onPreEncode(_: AgoraVideoFrame) -> Bool {
+    public func onPreEncode(_ videoFrame: AgoraVideoFrame) -> Bool {
         DispatchQueue.main.async {
-            self.channel.invokeMethod("onFrame", arguments: Date().millisecondsSince1970)
-            print("onPreEncode hook")
+            self.schannel.invokeMethod("onFrame", arguments: Date().millisecondsSince1970)
         }
         return true
-    }
+    }    
 
     public func onRecord(_: AgoraAudioFrame) -> Bool {
         return true
@@ -81,23 +81,25 @@ public class SwiftAgoraRtcRawdataPlugin: NSObject, FlutterPlugin, AgoraAudioFram
         return true
     }
 
+    //  - This method applies to iOS only.
+    //  - To observe multiple positions, use `|` (the OR operator).
+    //  - The default return value of this callback is
+    //  `AgoraVideoFramePositionPostCapture (1 << 0)`,
+    //  `AgoraVideoFramePositionPreRenderer (1 << 1)` and
+    //  `AgoraVideoFramePositionPreEncoder (1 << 2)`.
+    //  - To conserve system resources of the device, you can reduce the number of
+    //  observation positions appropriately according to your scenario.
+    //  @return The bit mask of the observation positions. See AgoraVideoFramePosition.
     public func getObservedFramePosition() -> UInt32{
-        return 1 << 2 | 1 << 1
+        return 1 << 2
+        // return 1 << 2 | 1 << 1
     }
 
     public func onCapture(_ videoFrame: AgoraVideoFrame) -> Bool {
-        memset(videoFrame.uBuffer, 0, Int(videoFrame.uStride * videoFrame.height) / 2)
-        memset(videoFrame.vBuffer, 0, Int(videoFrame.vStride * videoFrame.height) / 2)
-        DispatchQueue.main.async {
-            self.channel.invokeMethod("onFrame", arguments: Date().millisecondsSince1970)
-            print("onCapturer hook")
-        }
         return true
     }
 
     public func onRenderVideoFrame(_ videoFrame: AgoraVideoFrame, uid _: UInt) -> Bool {
-        memset(videoFrame.uBuffer, 255, Int(videoFrame.uStride * videoFrame.height) / 2)
-        memset(videoFrame.vBuffer, 255, Int(videoFrame.vStride * videoFrame.height) / 2)
         return true
     }
 }
